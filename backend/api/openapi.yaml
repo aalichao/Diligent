@@ -1,0 +1,194 @@
+openapi: '3.0.3'
+
+info:
+  title: CSE186 Authenticated Books Example
+  version: 0.2.0
+
+servers:
+  - url: http://localhost:3010/v0
+
+paths:
+  /login:
+    post:
+      description: Login
+      requestBody:
+        description: Request Body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        200:
+          description: Books Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /workspace:
+    get:
+      security:
+        - bearerAuth: []
+      description: Get workspaces for the authenticated user
+      tags:
+        - User
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspaces'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /workspace/{id}/channel:
+    get:
+      # security:
+      #   - bearerAuth: []
+      description: Get channels for a specific workspace
+      tags:
+        - Channel
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the workspace
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Channels'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+
+  /channel/{id}/message:
+    get:
+      # security:
+      #     - bearerAuth: []
+      description: Get channels for a specific workspace
+      tags:
+        - Message
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the channel
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Messages'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+    # post:
+      # security:
+      #   - bearerAuth: []
+    #   description: Creates a new book
+    #   requestBody:
+    #     description: Application to add
+    #     required: true
+    #     content:
+    #       application/json:
+    #         schema:
+    #           $ref: '#/components/schemas/Book'
+    #   responses:
+    #     201:
+    #       description: Application response
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/Book'
+    #     400:
+    #       description: Invalid ISBN
+    #     409:
+    #       description: Conflict. Requested ISBN in use.
+    #     default:
+    #       description: unexpected error
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/UnexpectedError'
+
+components:
+  schemas:
+    UnexpectedError:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+    Credentials:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+        accessToken:
+          type: string
+      required:
+        - name
+        - accessToken
+    
+    Workspaces:
+      type: array
+      items:
+        type: object
+    
+    Channels:
+      type: array
+      items:
+        type: object
+    
+    Messages:
+      type: array
+      items:
+        type: object
+
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
